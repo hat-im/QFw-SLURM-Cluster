@@ -67,6 +67,10 @@ services:
       # no overlay. (Targeted mounts avoid shadowing image-built artifacts.)
     expose:
       - "6817"
+    ports:
+      # Login-node sshd, for `ssh -p ${QFW_SSH_PORT:-2222} user-a@<host>`.
+      # Keys come from config/ssh-keys/<user>.pub (tools/provision-qfw-cluster.sh).
+      - "${QFW_SSH_PORT:-2222}:22"
     depends_on:
       - "slurmdbd"
     networks:

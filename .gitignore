@@ -55,3 +55,6 @@ docker-compose.override.yml
 /shared-dir/streamflow-chemistry/
 /shared-dir/home/
 /streamflow/chemistry/**/__pycache__/
+
+# Per-user SSH login keys for the slurmctld login port (config/ssh-keys/README.md).
+/config/ssh-keys/*.pub

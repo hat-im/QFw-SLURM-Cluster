@@ -136,6 +136,24 @@ install -d -o "${uid}" -g "${gid}" -m 0700 "${home}/qfw-runs"
 EOF
 	done
 
+	# Login keys: the home directory is shared by every container, so
+	# slurmctld (the published login node) is enough.
+	if [[ "${container}" == slurmctld ]]; then
+		for definition in "${users[@]}"; do
+			IFS=: read -r name uid gid home _ <<<"${definition}"
+			key_file="${script_dir}/config/ssh-keys/${name}.pub"
+			if [[ ! -r "${key_file}" ]]; then
+				echo "qfw-provision: no ${key_file}; ${name} has no SSH login" >&2
+				continue
+			fi
+			docker exec -i slurmctld bash -c '
+				set -euo pipefail
+				install -d -o "$1" -g "$2" -m 0700 "$3/.ssh"
+				install -o "$1" -g "$2" -m 0600 /dev/stdin "$3/.ssh/authorized_keys"
+			' _ "${uid}" "${gid}" "${home}" <"${key_file}"
+		done
+	fi
+
 	docker cp "${profile_file}" \
 		"${container}:/tmp/qfw-test-user-profile.sh"
 	docker exec -i "${container}" bash -s <<'EOF'
